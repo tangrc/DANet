@@ -9,7 +9,7 @@ This is the tensorflow implementation of DANet. This model introduces the concep
 ## Project File Description
 `config/algo.conf` is the model parameter configuration, including multi-behavior sequence sideinfo, parameters of each network layer, activation function, optimizer parameter settings, loss fusion parameters, etc.
 
-`model/model.py` is the network structure of DANet. The graph construction function is `build_graph()`, which includes the `inference()` describing the network forward process, the multi-party `loss()`, and the `optimizer()`.
+`model/model.py` is the network structure of DANet. The graph construction function is `build_graph()`, which includes the `inference()` describing the network forward process, the multi-party `loss()`, and the `optimizer()`
 
 ![image](https://github.com/user-attachments/assets/f622c5e9-1ba3-4cbb-b32d-c0824a10cf43)
 
