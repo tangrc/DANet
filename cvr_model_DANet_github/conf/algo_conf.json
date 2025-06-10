@@ -52,7 +52,7 @@
           "sa_num_output_units": 16,
           "ma_num_units": 16,
           "ma_num_output_units": 16,
-          "num_heads": 2,
+          "num_heads": 8,
           "seq_type": "concat"
         },
         "batch_norm": true,
