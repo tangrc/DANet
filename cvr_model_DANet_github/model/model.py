@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 # -*- coding:utf8 -*-
-'''
-  @Datetime: 2021-11-20 15:11:38
-  @Author:   shiliu
-'''
 import sys
 import os
 
@@ -212,7 +208,6 @@ class DANet(Algorithm):
                             global_step=self.global_step,
                             learning_rate=opt_conf.get("learning_rate", 0.01),
                             optimizer=optimizer,
-                            # update_ops=update_ops,
                             clip_gradients=opt_conf.get('clip_gradients', 5),
                             variables=vars,
                             increment_global_step=False,
@@ -224,7 +219,6 @@ class DANet(Algorithm):
                     global_step=self.global_step,
                     learning_rate=self.opts_conf[global_opt_name].get("learning_rate", 0.01),
                     optimizer=global_optimizer,
-                    # update_ops=update_ops,
                     clip_gradients=self.opts_conf[global_opt_name].get('clip_gradients', 5.0),
                     variables=global_opt_vars,
                     increment_global_step=False,
@@ -277,7 +271,6 @@ class DANet(Algorithm):
         self.reset_auc_ops, self.localvar = self.reset_variables(collection_key=tf.GraphKeys.LOCAL_VARIABLES,
                                                                  matchname='%s_Metrics/%s-auc' % (
                                                                      self.model_name, self.model_name))
-        # matchname的传参是用的summary的scope，(tp,fn,tn,fp)
 
     def reset_variables(self, collection_key=tf.GraphKeys.LOCAL_VARIABLES, matchname='auc/', not_match=None):
         localv = tf.get_collection(collection_key)
@@ -495,7 +488,7 @@ class DANet(Algorithm):
             logistic = tf.identity(prediction, name="rank_predict")
 
     def run_predict(self, context, mon_session, task_index, thread_index):
-        if int(thread_index) != 0:  # predict with one thread
+        if int(thread_index) != 0:  
             self.logger.info("Skip thread_ind==%s" % str(thread_index))
             return
 
@@ -517,8 +510,6 @@ class DANet(Algorithm):
             pass
 
         run_ops = [self.prediction, self.label, id_feature_tensor]
-        # self.debug_tensor_collector['share_price_level_emb'] = tf.get_default_graph().get_tensor_by_name("Embedding_Layer/price_level_catleaf_shared_embedding/price_level_catleaf")
-        # self.debug_tensor_collector['share_price_level_emb'] = tf.get_default_graph().get_tensor_by_name("Embedding_Layer/price_level_catleaf_shared_embedding/price_level_catleaf/part_0:0")
 
         debug_tensor_names = []
         for tensor_name, tensor in self.debug_tensor_collector.items():
@@ -543,7 +534,7 @@ class DANet(Algorithm):
                     for tensor_name, tensor_value in zip(debug_tensor_names, run_res[3:]):
                         ex.append('{}={}'.format(tensor_name, str(tensor_value[i].tolist())))
                     if len(ex) > 0:
-                        ex_str = '#'.join(ex)
+                        ex_str = ''.join(ex)
                         one_res.append(ex_str)
                     else:
                         one_res.append('-')
@@ -610,10 +601,6 @@ class DANet(Algorithm):
                 if len(self.localvar) > 0:
                     index = np.array([0, -1])
                     self.logger.info(('localcnt:%s\t' % str(localcnt)) + '//'.join([x.name for x in self.localvar]))
-                    # localvar值为： CTR_Metrics / CTR - auc / true_positives:0 //
-                    #              CTR_Metrics / CTR - auc / false_negatives:0 //
-                    #              CTR_Metrics / CTR - auc / true_negatives:0 //
-                    #              CTR_Metrics / CTR - auc / false_positives:0
                     self.logger.info(('localcnt:%s\t' % str(localcnt)) + '//'.join([str(x[index]) for x in flocalv]))
 
                 auc, totalauc, decay_auc = metrics['scalar/auc'], metrics['scalar/total_auc'], metrics['scalar/acc_auc']
@@ -627,7 +614,7 @@ class DANet(Algorithm):
                         str(decay_auc),
                         str(thread_index)))
 
-                newmark = np.max(flocalv[0][np.array([0, -1])])  # 是true_positives累积到达20000,则重置total auc
+                newmark = np.max(flocalv[0][np.array([0, -1])]) 
                 if newmark > self.metric_conf['auc_compute'].get('true_positives', 20000):
                     self.logger.info("positive_num now:{}".format(str(newmark)))
                     self.logger.info("auc_reset_step:{}".format(str(1000)))
@@ -641,7 +628,7 @@ class DANet(Algorithm):
 
             except (ResourceExhaustedError, OutOfRangeError) as e:
                 self.logger.info('Got exception run : %s | %s' % (e, traceback.format_exc()))
-                break  # release all
+                break  
             except ConnectionError as e:
                 self.logger.info('Got exception run : %s | %s' % (e, traceback.format_exc()))
             except Exception as e:
@@ -683,7 +670,7 @@ class DANet(Algorithm):
 
             except (ResourceExhaustedError, OutOfRangeError) as e:
                 self.logger.info('Got exception run : %s | %s' % (e, traceback.format_exc()))
-                break  # release all
+                break  
             except ConnectionError as e:
                 self.logger.info('Got exception run : %s | %s' % (e, traceback.format_exc()))
             except Exception as e:
@@ -693,8 +680,6 @@ class DANet(Algorithm):
     def build_query_attention(self, sequence_layer_dict, seq_column_len, attention_layer, attention_dict, block_name,
                               ma_num_units=64, ma_num_output_units=64, num_heads=2, is_dcm =False):
         logger.info("Debug!! Start Build Query Attention: {}".format(block_name))
-        # layer_dict = {}
-        # weight_dict = {}
         if sequence_layer_dict is None or block_name not in sequence_layer_dict.keys():
             logger.info(
                 "Debug!! Build Query Attention error. name is {}, dict is {}".format(block_name, sequence_layer_dict))
@@ -769,12 +754,6 @@ class DANet(Algorithm):
                 else:
                     ma_num_output_units = ma_num_output_units
                 dec = tf.reshape(item_vec, [-1, ma_num_output_units])
-                # shap config
-                # if aop.interpret.shap.shap_enabled():
-                #     dec = aop.interpret.shap.mark_as_input(dec,block_name,'target_attention')
-                #     self.layer_dict[block_name] = dec
-                # layer_dict[block_name] = dec
-                # weight_dict[block_name] = stt_vec
                 logger.info("Debug!!block is {},  dec is {} ".format(block_name, dec))
                 dec = tf.concat(dec, axis=1)
                 logger.info("Debug!!block is {}, item_vec is {}, stt_vec is {}, dec is {} ".format(block_name, item_vec,
@@ -821,8 +800,6 @@ class DANet(Algorithm):
                         residual_connection=True,
                         attention_normalize=True
                     )
-                    # if self.model_conf['model_hyperparameter']['atten_type'] == 'self':
-                    # self attention
                     dec = tf.reshape(tf.reduce_mean(item_vec, axis=1), [
                         -1, self.model_conf['model_hyperparameter']['sa_num_output_units']])
                     layer_dict[block_name] = dec
