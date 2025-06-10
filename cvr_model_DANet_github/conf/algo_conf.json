@@ -1,0 +1,82 @@
+{
+  "CTR": {
+    "model_type": "DANet",
+    "prob": "68",
+    "modelx": {
+      "model_hyperparameter": {
+        "clk_seq_v_feats": [
+          "clk_seq_item",
+          "clk_seq_brand",
+          "clk_seq_cate",
+          "clk_seq_seller",
+          "clk_seq_cat1"
+        ],
+        "buy_seq_v_feats": [
+          "buy_seq_item",
+          "buy_seq_brand",
+          "buy_seq_cate",
+          "buy_seq_seller",
+          "buy_seq_cat1"
+        ],
+        "cart_seq_v_feats": [
+          "cart_seq_item",
+          "cart_seq_brand",
+          "cart_seq_cate",
+          "cart_seq_seller",
+          "cart_seq_cat1"
+        ],
+        "dcm_buy_seq_v_feats": [
+          "buy_seq_discount",
+          "buy_seq_cate",
+          "buy_seq_price"
+        ],
+        "activation": "lrelu",
+        "dnn_hidden_units": [
+          256,
+          128
+        ],
+        "bias_dnn_hidden_units": [
+          64,
+          32
+        ],
+        "need_dropout": true,
+        "dropout_rate": 0.5,
+        "dnn_l2_reg": 1e-5,
+        "cold_pos_w": 3.0,
+        "atten_param": {
+          "atten_mode": "ln",
+          "residual_connection": false,
+          "attention_normalize": true,
+          "attention_l2_reg": 1e-5,
+          "sa_num_units": 16,
+          "sa_num_output_units": 16,
+          "ma_num_units": 16,
+          "ma_num_output_units": 16,
+          "num_heads": 2,
+          "seq_type": "concat"
+        },
+        "batch_norm": true,
+        "gate_hidden_units": [64, 32],
+        "exp_pay_weight":0.1,
+        "mse_loss_weight": 0.02
+      }
+    },
+    "optimizer": {
+      "Adagrad": {
+        "scope": "Global",
+        "lr_func": "cold_start",
+        "learning_rate": 0.1,
+        "lrcs_init_lr": 0.001,
+        "lrcs_init_step": 200000,
+        "decay_step": 100000,
+        "decay_rate": 0.95,
+        "clip_gradients": 5.0,
+        "staircase": true
+      }
+    },
+    "main_columns": "user_columns;item_columns",
+    "bias_columns": "bias_columns",
+    "seq_column_blocks": "buy_seq_list:buy_seq_len_columns:target_columns:buy_seq_v_feats;clk_seq_list:clk_seq_len_columns:target_columns:clk_seq_v_feats;cart_seq_list:cart_seq_len_columns:target_columns:cart_seq_v_feats",
+    "dcm_context_columns": "dcm_context_columns"
+  }
+}
